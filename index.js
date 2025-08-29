@@ -1,103 +1,71 @@
-
-const express = require('express');
+import express from "express";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-
 app.use(express.json());
 
-const USER_ID = "john_doe_28082025";
-const EMAIL = "john@xyz.com";
-const ROLL_NUMBER = "ABCD123";
+// User details
+const fullName = "john_doe";
+const dob = "17091999"; // ddmmyyyy
+const email = "john@xyz.com";
+const rollNumber = "ABCD123";
 
-app.post('/bfhl', (req, res) => {
-   
-    try {
-       
-        const { data } = req.body;
-        if (!data || !Array.isArray(data)) {
-            return res.status(400).json({
-                is_success: false,
-                message: "Invalid input. Request body must contain a 'data' array."
-            });
-        }
-        const oddNumbers = [];
-        const evenNumbers = [];
-        const alphabets = [];
-        const specialCharacters = [];
-        let sum = 0;
-        let concatString = "";
+function processData(data) {
+  let even_numbers = [];
+  let odd_numbers = [];
+  let alphabets = [];
+  let special_characters = [];
+  let sum = 0;
 
-        data.forEach(item => {
-            if (typeof item === 'string') {
-]
-                const numberValue = Number(item);
-                if (!isNaN(numberValue) && isFinite(numberValue)) {
-                    if (numberValue % 2 === 0) {
-                        evenNumbers.push(item);
-                    } else {
-                        oddNumbers.push(item);
-                    }
-
-                    sum += numberValue;
-                } else if (item.length === 1 && /[a-zA-Z]/.test(item)) {
-                    alphabets.push(item.toUpperCase());
-                } else if (item.length === 1 && /[^a-zA-Z0-9]/.test(item)) {
-
-                    specialCharacters.push(item);
-                }
-            }
-        });
-        if (alphabets.length > 0) {
-            const reversedAlphabets = [...alphabets].reverse();
-            for (let i = 0; i < reversedAlphabets.length; i++) {
-                if (i % 2 === 0) {
-               
-                    concatString += reversedAlphabets[i].toUpperCase();
-                } else {
-                    concatString += reversedAlphabets[i].toLowerCase();
-                }
-            }
-        }
-
-
-        res.status(200).json({
-            is_success: true,
-            user_id: USER_ID,
-            email: EMAIL,
-            roll_number: ROLL_NUMBER,
-            odd_numbers: oddNumbers,
-            even_numbers: evenNumbers,
-            alphabets: alphabets,
-            special_characters: specialCharacters,
-            sum: String(sum), 
-            concat_string: concatString
-        });
-    } catch (error) {
-  
-        console.error("An error occurred:", error);
-        res.status(500).json({
-            is_success: false,
-            message: "An internal server error occurred."
-        });
+  data.forEach((item) => {
+    if (/^-?\d+$/.test(item)) {
+      let num = parseInt(item);
+      if (num % 2 === 0) {
+        even_numbers.push(item);
+      } else {
+        odd_numbers.push(item);
+      }
+      sum += num;
+    } else if (/^[a-zA-Z]+$/.test(item)) {
+      alphabets.push(item.toUpperCase());
+    } else {
+      special_characters.push(item);
     }
-});
-app.get('/bfhl', (req, res) => {
-    res.status(200).json({
-        message: 'This endpoint only accepts POST requests. Please send a JSON body with a "data" array.',
-        is_success: true,
-        user_id: USER_ID,
-        email: EMAIL,
-        roll_number: ROLL_NUMBER,
-    });
+  });
+
+  // concat string = reverse alphabets + alternating caps
+  let allAlpha = alphabets.join("");
+  let reversed = allAlpha.split("").reverse().join("");
+  let concat_string = reversed
+    .split("")
+    .map((ch, i) => (i % 2 === 0 ? ch.toUpperCase() : ch.toLowerCase()))
+    .join("");
+
+  return {
+    is_success: true,
+    user_id: `${fullName.toLowerCase()}_${dob}`,
+    email,
+    roll_number: rollNumber,
+    odd_numbers,
+    even_numbers,
+    alphabets,
+    special_characters,
+    sum: sum.toString(),
+    concat_string,
+  };
+}
+
+app.post("/bfhl", (req, res) => {
+  try {
+    const { data } = req.body;
+    if (!data || !Array.isArray(data)) {
+      return res.status(400).json({ is_success: false, message: "Invalid input" });
+    }
+    const result = processData(data);
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ is_success: false, message: "Server error" });
+  }
 });
 
-app.get('/', (req, res) => {
-    res.send('Welcome to the BFHL API! Use the /bfhl endpoint with a POST request.');
-});
-
-// Step 15: Start the server and listen on the specified port.
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
