@@ -1,8 +1,8 @@
 {
   "name": "bfhl-api",
   "version": "1.0.0",
-  "description": "A REST API for the BFHL project.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js"
   },
