@@ -77,22 +77,6 @@ app.post('/bfhl', (req, res) => {
             const reversedAlphabets = [...alphabets].reverse();
             for (let i = 0; i < reversedAlphabets.length; i++) {
                 if (i % 2 === 0) {
-                    concatString += reversedAlphabets[i].toLowerCase();
-                } else {
-                    concatString += reversedAlphabets[i].toUpperCase();
-                }
-            }
-        }
-        
-        // The instructions ask for reverse order in alternating caps.
-        // Example "a", "R" -> reversed is "R", "a". Alternating caps -> "Ra" (R is uppercase, a is lowercase).
-        // Let's re-implement this to be precise: "Ra" -> R is 0-index, a is 1-index.
-        // The first character of the reversed string should be uppercased.
-        concatString = ""; // Reset for the correct logic
-        if (alphabets.length > 0) {
-            const reversedAlphabets = [...alphabets].reverse();
-            for (let i = 0; i < reversedAlphabets.length; i++) {
-                if (i % 2 === 0) {
                     // First character (index 0) becomes uppercase
                     concatString += reversedAlphabets[i].toUpperCase();
                 } else {
@@ -126,12 +110,23 @@ app.post('/bfhl', (req, res) => {
     }
 });
 
-// Step 13: Define a root route for testing and sanity check.
+// Step 13: Add a GET route for the /bfhl endpoint to provide a user-friendly message.
+app.get('/bfhl', (req, res) => {
+    res.status(200).json({
+        message: 'This endpoint only accepts POST requests. Please send a JSON body with a "data" array.',
+        is_success: true,
+        user_id: USER_ID,
+        email: EMAIL,
+        roll_number: ROLL_NUMBER,
+    });
+});
+
+// Step 14: Define a root route for testing and sanity check.
 app.get('/', (req, res) => {
     res.send('Welcome to the BFHL API! Use the /bfhl endpoint with a POST request.');
 });
 
-// Step 14: Start the server and listen on the specified port.
+// Step 15: Start the server and listen on the specified port.
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
